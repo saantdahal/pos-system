@@ -1,0 +1,38 @@
+# Django
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.db.sqlite3
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Git
+.git/
+.gitignore
+
+# Flutter build files
+local_cafehub/build/
+local_cafehub/.dart_tool/
+local_cafehub/.packages
+local_cafehub/.flutter-plugins
+
+# Redis dump
+dump.rdb

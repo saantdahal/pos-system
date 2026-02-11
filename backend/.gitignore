@@ -1,0 +1,7 @@
+venv/
+.venv/
+.env
+bhansaGhar_backend/.env
+.env.development
+.env.production
+.env.staging

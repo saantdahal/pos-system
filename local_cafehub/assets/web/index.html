@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bhansa Ghar - Order Menu</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="cafe-name">☕ Bhansa Ghar</div>
+                <div class="cafe-subtitle">Order your favorites instantly</div>
+            </div>
+            <div class="header-actions">
+                <div class="icon-btn" onclick="openCart()">
+                    🛒
+                    <span class="badge" id="headerCartCount" style="display: none;">0</span>
+                </div>
+                <div class="icon-btn" onclick="showOrdersPage()">
+                    📋
+                    <span class="badge" id="headerOrdersCount" style="display: none;">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="categories">
+        <div class="category-tabs" id="categoryTabs"></div>
+    </div>
+
+    <!-- Menu Page -->
+    <div class="page active" id="menuPage">
+        <div class="menu-container" id="menuContainer"></div>
+    </div>
+
+    <!-- Orders Page -->
+    <div class="page" id="ordersPage">
+        <div class="orders-header"
+            style="padding: 20px; display: flex; align-items: center; gap: 12px; background: var(--bg-secondary); position: sticky; top: 0; z-index: 10;">
+            <button onclick="showMenuPage()"
+                style="background: transparent; border: none; font-size: 24px; cursor: pointer; padding: 8px;">←</button>
+            <h2 style="margin: 0; font-size: 20px; font-weight: 600;">My Orders</h2>
+        </div>
+        <div class="order-list" id="orderList"></div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="showMenuPage()">
+            <div class="nav-icon">🍽️</div>
+            <div class="nav-label">Menu</div>
+        </div>
+        <div class="nav-item" onclick="openCart()">
+            <div class="nav-icon">🛒</div>
+            <div class="nav-label">Cart</div>
+            <span class="nav-badge" id="navCartCount" style="display: none;">0</span>
+        </div>
+        <div class="nav-item" onclick="showOrdersPage()">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">Orders</div>
+            <span class="nav-badge" id="navOrdersCount" style="display: none;">0</span>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="modal" id="cartModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Your Order</div>
+                <button class="close-btn" onclick="closeCart()">×</button>
+            </div>
+            <div class="modal-body" id="cartBody"></div>
+        </div>
+    </div>
+
+    <!-- Order Status Modal -->
+    <div class="modal" id="statusModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Order Status</div>
+                <button class="close-btn" onclick="closeStatus()">×</button>
+            </div>
+            <div class="modal-body" id="statusBody"></div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+
+</body>
+
+</html>

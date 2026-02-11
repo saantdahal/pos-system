@@ -1,0 +1,496 @@
+{% load static %}
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ landing_page.hero_title }} - Order Online</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/landing_page.css' %}?v=5">>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                {% if landing_page.navbar_logo_image %}
+                <img src="{{ landing_page.navbar_logo_image.url }}" alt="Logo" class="navbar-logo-image">
+                {% else %}
+                {{ landing_page.logo|safe }}
+                {% endif %}
+                {{ landing_page.brand_name }}
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#restaurants">Restaurants</a></li>
+                <li><a href="#apps">Apps</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <button class="mobile-menu-btn">☰</button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero" {% if landing_page.hero_image %}
+        style="background-image: url('{{ landing_page.hero_image.url }}'); background-size: cover; background-position: center;"
+        {% endif %}>
+        <div class="hero-content">
+            <h1>{{ landing_page.hero_title }}</h1>
+            <p>{{ landing_page.hero_subtitle }}</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" data-link="{{ landing_page.hero_cta_link|default:'' }}"
+                    onclick="handleHeroClick(this.dataset.link)">
+                    {{ landing_page.hero_cta_text }}
+                </button>
+                <button class="btn btn-outline"
+                    onclick="document.getElementById('apps').scrollIntoView({behavior: 'smooth'})">
+                    Download Apps
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-number">{{ restaurants_count }}</div>
+                <div class="stat-label">Partner Restaurants</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ landing_page.stat_2_value|default:"500+" }}</div>
+                <div class="stat-label">{{ landing_page.stat_2_label }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ landing_page.stat_3_value|default:"1000+" }}</div>
+                <div class="stat-label">{{ landing_page.stat_3_label }}</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">{{ landing_page.stat_4_value|default:"24/7" }}</div>
+                <div class="stat-label">{{ landing_page.stat_4_label }}</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Container -->
+    <div class="container">
+        <!-- Info Banner -->
+        <div class="info-banner">
+            <span class="info-banner-icon">{{ landing_page.info_banner_icon|safe }}</span>
+            <div class="info-banner-text">{{ landing_page.info_banner_text }}</div>
+            {% if landing_page.info_banner_image %}
+            <style>
+                .info-banner {
+                    background-image: url('{{ landing_page.info_banner_image.url }}');
+                    background-size: cover;
+                    background-position: center;
+                }
+            </style>
+            {% endif %}
+        </div>
+
+        <!-- Features Section -->
+        <section>
+            <div class="section-header">
+                <span class="section-tag">Why Choose Us</span>
+                <h2 class="section-title">{{ landing_page.features_title }}</h2>
+                <p class="section-subtitle">{{ landing_page.features_subtitle }}</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <span class="feature-icon">
+                        {% if landing_page.feature_1_icon_image %}
+                        <img src="{{ landing_page.feature_1_icon_image.url }}" alt="Feature 1 Icon">
+                        {% else %}
+                        {{ landing_page.feature_1_icon|safe }}
+                        {% endif %}
+                    </span>
+                    <div class="feature-title">{{ landing_page.feature_1_title }}</div>
+                    <div class="feature-description">{{ landing_page.feature_1_description }}</div>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">
+                        {% if landing_page.feature_2_icon_image %}
+                        <img src="{{ landing_page.feature_2_icon_image.url }}" alt="Feature 2 Icon">
+                        {% else %}
+                        {{ landing_page.feature_2_icon|safe }}
+                        {% endif %}
+                    </span>
+                    <div class="feature-title">{{ landing_page.feature_2_title }}</div>
+                    <div class="feature-description">{{ landing_page.feature_2_description }}</div>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">
+                        {% if landing_page.feature_3_icon_image %}
+                        <img src="{{ landing_page.feature_3_icon_image.url }}" alt="Feature 3 Icon">
+                        {% else %}
+                        {{ landing_page.feature_3_icon|safe }}
+                        {% endif %}
+                    </span>
+                    <div class="feature-title">{{ landing_page.feature_3_title }}</div>
+                    <div class="feature-description">{{ landing_page.feature_3_description }}</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Us Section -->
+        <section id="about" class="about-section">
+            <div class="about-content">
+                <div class="about-image">
+                    {% if landing_page.about_image %}
+                    <img src="{{ landing_page.about_image.url }}" alt="About"
+                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
+                    {% else %}
+                    🍽️
+                    {% endif %}
+                </div>
+                <div class="about-text">
+                    <h2>{{ landing_page.about_title }}</h2>
+                    <p>{{ landing_page.about_description }}</p>
+                    <p>{{ landing_page.about_description_2 }}</p>
+                    <div class="about-highlights">
+                        <div class="highlight-item">
+                            <div class="highlight-icon">✓</div>
+                            <div class="highlight-text">{{ landing_page.highlight_1 }}</div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="highlight-icon">✓</div>
+                            <div class="highlight-text">{{ landing_page.highlight_2 }}</div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="highlight-icon">✓</div>
+                            <div class="highlight-text">{{ landing_page.highlight_3 }}</div>
+                        </div>
+                        <div class="highlight-item">
+                            <div class="highlight-icon">✓</div>
+                            <div class="highlight-text">{{ landing_page.highlight_4 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- App Download Section -->
+        <section id="apps" class="app-section">
+            <div class="app-content">
+                <div class="app-header">
+                    <h2>{{ landing_page.app_section_title }}</h2>
+                    <p>{{ landing_page.app_section_description }}</p>
+                    <div
+                        style="background-color: #f0f7ff; border-left: 4px solid #2563eb; padding: 16px; margin-top: 20px; border-radius: 6px; font-size: 14px; color: #1e40af;">
+                        <strong>📱 For Restaurant Owners Only</strong><br>
+                        These mobile apps are exclusively for restaurant owners and staff to manage operations.
+                        Regular customers can order food directly through our website using table QR codes at any of our
+                        partner restaurants.
+                    </div>
+                </div>
+                <div class="app-grid">
+                    {% for app in app_cards %}
+                    <div class="app-card">
+                        <div class="app-icon">
+                            {% if app.icon_image %}
+                            {# Display uploaded image #}
+                            <img src="{{ app.icon_image.url }}" alt="{{ app.title }} icon" class="app-icon-image">
+                            {% elif app.icon_svg %}
+                            {# Display SVG code #}
+                            <div class="app-icon-svg">{{ app.icon_svg|safe }}</div>
+                            {% else %}
+                            {# Fallback to emoji #}
+                            <span class="app-icon-emoji">{{ app.icon|safe }}</span>
+                            {% endif %}
+                        </div>
+                        <h3>{{ app.title }}</h3>
+                        <p>{{ app.description }}</p>
+                        <div class="app-links">
+                            {% if app.ios_link %}
+                            <a href="{{ app.ios_link }}" class="app-link" target="_blank">
+                                <span>🍎</span>
+                                <span>Download for iOS</span>
+                            </a>
+                            {% endif %}
+                            {% if app.android_link %}
+                            <a href="{{ app.android_link }}" class="app-link" target="_blank">
+                                <span>🤖</span>
+                                <span>Download for Android</span>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <div class="cta-section">
+            <h2 class="cta-title">{{ landing_page.cta_title }}</h2>
+            <p class="cta-description">{{ landing_page.cta_description }}</p>
+            <button class="cta-button"
+                onclick="document.getElementById('restaurants').scrollIntoView({behavior: 'smooth'})">
+                {{ landing_page.cta_button_text }}
+            </button>
+        </div>
+
+        <!-- Restaurants Grid -->
+        <section id="restaurants" class="restaurants-section">
+            {% if restaurants %}
+            <div class="section-header">
+                <span class="section-tag">{{ landing_page.restaurants_section_tag }}</span>
+                <h2 class="section-title">{{ landing_page.restaurants_section_title }}</h2>
+                <p class="section-subtitle">{{ landing_page.restaurants_section_subtitle }}</p>
+            </div>
+            <div class="restaurants-grid">
+                {% for restaurant in restaurants %}
+                <div class="restaurant-card" onclick="goToRestaurant('{{ restaurant.slug }}')">
+                    {% if restaurant.hero_image %}
+                    <img src="{{ restaurant.hero_image }}" alt="{{ restaurant.name }}" class="restaurant-image">
+                    {% else %}
+                    <div class="restaurant-image">🍽️</div>
+                    {% endif %}
+
+                    <div class="restaurant-content">
+                        <div class="restaurant-name">{{ restaurant.name }}</div>
+                        <div class="restaurant-description">{{ restaurant.description }}</div>
+
+                        <div class="restaurant-meta">
+                            {% if restaurant.menu_count %}
+                            <div class="meta-item">
+                                <span>📋</span>
+                                <span>{{ restaurant.menu_count }} items</span>
+                            </div>
+                            {% endif %}
+                            {% if restaurant.tables_capacity %}
+                            <div class="meta-item">
+                                <span>🪑</span>
+                                <span>{{ restaurant.tables_capacity }} tables</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="restaurant-footer">
+                            <button class="btn-restaurant btn-restaurant-primary"
+                                onclick="goToRestaurant('{{ restaurant.slug }}'); event.stopPropagation();">
+                                View Menu →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">🏪</div>
+                <div class="empty-state-title">No Restaurants Available Yet</div>
+                <div class="empty-state-text">We're working hard to bring amazing restaurants to our platform. Check
+                    back soon!</div>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer id="contact" class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>{{ landing_page.logo }} {{ landing_page.brand_name }}</h3>
+                <p style="color: rgba(255, 255, 255, 0.8); font-size: 14px; line-height: 1.6; margin-top: 12px;">
+                    {{ landing_page.footer_tagline }}
+                </p>
+                <div class="footer-social-wrapper">
+                    <div class="footer-social-carousel">
+                        {% for social in social_links %}
+                        <a href="{{ social.url }}" class="social-icon" title="{{ social.platform.name }}"
+                            target="_blank">{{ social.platform.icon|safe }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            {% if footer_sections.quick_links %}
+            <div class="footer-section">
+                <h3>{{ landing_page.footer_section_quick_links_title }}</h3>
+                <ul>
+                    {% for link in footer_sections.quick_links %}
+                    <li>
+                        {% if link.url|startswith:"#" %}
+                        <a href="{{ link.url }}">
+                            {{ link.title }}
+                        </a>
+                        {% elif link.url|startswith:"/" or link.url|startswith:"http" %}
+                        <a href="{{ link.url }}" target="_blank">
+                            {{ link.title }}
+                        </a>
+                        {% else %}
+                        <a href="javascript:void(0)" data-slug="{{ link.url }}"
+                            onclick="showContentPage(this.dataset.slug)">
+                            {{ link.title }}
+                        </a>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if footer_sections.for_restaurants %}
+            <div class="footer-section">
+                <h3>{{ landing_page.footer_section_for_restaurants_title }}</h3>
+                <ul>
+                    {% for link in footer_sections.for_restaurants %}
+                    <li>
+                        {% if link.url|startswith:"#" %}
+                        <a href="{{ link.url }}">
+                            {{ link.title }}
+                        </a>
+                        {% elif link.url|startswith:"/" or link.url|startswith:"http" %}
+                        <a href="{{ link.url }}" target="_blank">
+                            {{ link.title }}
+                        </a>
+                        {% else %}
+                        <a href="javascript:void(0)" data-slug="{{ link.url }}"
+                            onclick="showContentPage(this.dataset.slug)">
+                            {{ link.title }}
+                        </a>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            {% if footer_sections.support %}
+            <div class="footer-section">
+                <h3>{{ landing_page.footer_section_support_title }}</h3>
+                <ul>
+                    {% for link in footer_sections.support %}
+                    <li>
+                        {% if link.url|startswith:"#" %}
+                        <a href="{{ link.url }}">
+                            {{ link.title }}
+                        </a>
+                        {% elif link.url|startswith:"/" or link.url|startswith:"http" %}
+                        <a href="{{ link.url }}" target="_blank">
+                            {{ link.title }}
+                        </a>
+                        {% else %}
+                        <a href="javascript:void(0)" data-slug="{{ link.url }}"
+                            onclick="showContentPage(this.dataset.slug)">
+                            {{ link.title }}
+                        </a>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; {% now "Y" %} {{ landing_page.brand_name }} - {{ landing_page.footer_tagline }} | All Rights
+                Reserved</p>
+        </div>
+    </footer>
+
+    <!-- Content Modal -->
+    <div id="contentModal" class="modal" style="z-index: 9999; position: fixed;">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeContentModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/landing_page.js' %}?v=2"></script>
+    <script>
+        function handleHeroClick(link) {
+            if (link) {
+                if (link.startsWith('#')) {
+                    const targetId = link.substring(1);
+                    const element = document.getElementById(targetId);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                } else {
+                    window.location.href = link;
+                }
+            } else {
+                const restaurantsElement = document.getElementById('restaurants');
+                if (restaurantsElement) {
+                    restaurantsElement.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        }
+
+        // Modal functionality for content pages
+        function showContentPage(pageSlug) {
+            console.log('Opening content page with slug:', pageSlug);
+            const modal = document.getElementById('contentModal');
+            const modalBody = document.getElementById('modalBody');
+
+            if (!modal) {
+                console.error('Modal element not found');
+                return;
+            }
+
+            console.log('Modal found, fetching content...');
+
+            // Fetch content from server
+            fetch(`/api/content-page/${pageSlug}/`)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data received:', data);
+                    if (data.error) {
+                        modalBody.innerHTML = '<p>Content not found.</p>';
+                    } else if (data.title && data.content) {
+                        modalBody.innerHTML = `
+                            <h2>${data.title}</h2>
+                            <div style="margin-top: 20px; line-height: 1.8; color: #333;">
+                                ${data.content}
+                            </div>
+                        `;
+                    } else {
+                        modalBody.innerHTML = '<p>Content not available.</p>';
+                    }
+                    modal.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                    console.log('Modal displayed');
+                })
+                .catch(error => {
+                    console.error('Error loading content page:', error);
+                    console.error('Attempted slug:', pageSlug);
+                    modalBody.innerHTML = '<p>Error loading content. Please try again later.</p>';
+                    modal.style.display = 'block';
+                });
+        }
+
+        function closeContentModal() {
+            const modal = document.getElementById('contentModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                console.log('Modal closed');
+            }
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('contentModal');
+            if (event.target === modal) {
+                closeContentModal();
+            }
+        }
+    </script>
+</body>
+
+</html>

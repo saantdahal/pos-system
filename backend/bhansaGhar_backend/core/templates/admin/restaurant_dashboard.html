@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<!-- prettier-ignore -->
+{% load static %}
+<html>
+
+<head>
+    <title>{% block title %}{{ restaurant_name }} - Dashboard{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Admin default CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/nav_sidebar.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/dashboard.css' %}">
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/restaurant_dashboard.css' %}">
+</head>
+
+<body>
+    {% block content %}
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="restaurant-dashboard">
+        <!-- Restaurant Header -->
+        <div class="restaurant-header">
+            <div class="restaurant-info">
+                <h1>
+                    <span>🏪</span>
+                    <span id="restaurantName">{{ restaurant_data.name }}</span>
+                </h1>
+                <p>📍 {{ restaurant_data.address|default:"Location not set" }} | Owner: {{ restaurant_data.owner }}</p>
+                <div class="restaurant-status {% if restaurant_data.is_active %}active{% else %}inactive{% endif %}">
+                    {% if restaurant_data.is_active %}
+                    🟢 Active
+                    {% else %}
+                    🔴 Inactive
+                    {% endif %}
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="edit-btn" onclick="openEditModal()">
+                    ✏️ Edit Details
+                </button>
+                <a href="/admin/" class="back-btn" onclick="goBackToOverview()">
+                    ⬅️ Back to Overview
+                </a>
+            </div>
+        </div>
+
+        <!-- Today's Highlights -->
+        <div class="highlights-section">
+            <div class="highlight-card orders">
+                <div class="icon">📋</div>
+                <div class="value" id="todayOrders">{{ today_stats.orders_today|default:0 }}</div>
+                <div class="label">Orders Today</div>
+            </div>
+            <div class="highlight-card revenue">
+                <div class="icon">💰</div>
+                <div class="value" id="todayRevenue">Rs. {{ today_stats.daily_revenue|default:0|floatformat:0 }}</div>
+                <div class="label">Today's Revenue</div>
+            </div>
+            <div class="highlight-card active">
+                <div class="icon">🔔</div>
+                <div class="value" id="activeOrders">{{ today_stats.active_orders|default:0 }}</div>
+                <div class="label">Active Orders</div>
+            </div>
+            <div class="highlight-card staff">
+                <div class="icon">👥</div>
+                <div class="value" id="onlineStaff">{{ stats.staff_count|default:0 }}</div>
+                <div class="label">Total Staff</div>
+            </div>
+        </div>
+
+        <!-- Secondary Stats -->
+        <div class="stats-grid-secondary">
+            <div class="stat-mini">
+                <div class="value" id="totalOrders">{{ stats.total_orders|default:0 }}</div>
+                <div class="label">Total Orders (30d)</div>
+            </div>
+            <div class="stat-mini">
+                <div class="value" id="totalRevenue">Rs. {{ stats.total_revenue|default:0|floatformat:0 }}</div>
+                <div class="label">Total Revenue (30d)</div>
+            </div>
+            <div class="stat-mini">
+                <div class="value" id="totalTables">{{ today_stats.total_tables|default:0 }}</div>
+                <div class="label">Tables</div>
+            </div>
+            <div class="stat-mini">
+                <div class="value" id="totalMenuItems">{{ today_stats.total_menu_items|default:0 }}</div>
+                <div class="label">Menu Items</div>
+            </div>
+            <div class="stat-mini">
+                <div class="value" id="avgOrderValue">Rs. {{ stats.avg_order_value|default:0|floatformat:0 }}</div>
+                <div class="label">Avg Order Value</div>
+            </div>
+            <div class="stat-mini">
+                <div class="value" id="bargainRate">{{ bargain_metrics.success_rate|default:0 }}%</div>
+                <div class="label">Bargain Success</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="section-header">
+            <h2 class="section-title">⚡ Quick Actions</h2>
+        </div>
+        <div class="quick-actions">
+            <a href="/admin/orders/order/?restaurant__id__exact={{ restaurant_data.id }}" class="action-card orders">
+                <div class="icon">📋</div>
+                <div class="name">Manage Orders</div>
+                <div class="count">{{ stats.total_orders|default:0 }} total</div>
+            </a>
+            <a href="/admin/restaurants/menuitem/?restaurant__id__exact={{ restaurant_data.id }}"
+                class="action-card menu">
+                <div class="icon">🍽️</div>
+                <div class="name">Menu Items</div>
+                <div class="count">{{ today_stats.total_menu_items|default:0 }} items</div>
+            </a>
+            <a href="{% url 'admin:restaurants_table_changelist' %}" class="action-card tables">
+                <div class="icon">🪑</div>
+                <div class="name">Manage Tables</div>
+                <div class="count">{{ today_stats.total_tables|default:0 }} tables</div>
+            </a>
+            <a href="/admin/core/user/" class="action-card staff">
+                <div class="icon">👥</div>
+                <div class="name">Staff Members</div>
+                <div class="count">{{ stats.staff_count|default:0 }} staff</div>
+            </a>
+            <a href="{% url 'admin:invoices_invoice_changelist' %}" class="action-card invoices">
+                <div class="icon">💰</div>
+                <div class="name">Invoices</div>
+                <div class="count">View all</div>
+            </a>
+            <a href="/admin/core/websitedata/?restaurant__id__exact={{ restaurant_data.id }}"
+                class="action-card website">
+                <div class="icon">🌐</div>
+                <div class="name">Website Settings</div>
+                <div class="count">Manage online presence</div>
+            </a>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="section-header">
+            <h2 class="section-title">📈 Analytics</h2>
+        </div>
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>📊 Daily Revenue (Last 30 Days)</h3>
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>📋 Order Status Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>⏰ Hourly Orders (Today)</h3>
+                <div class="chart-container">
+                    <canvas id="hourlyChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>🤝 Bargain Metrics</h3>
+                <div class="chart-container">
+                    <canvas id="bargainChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Tables -->
+        <div class="tables-grid">
+            <!-- Top Items -->
+            <div class="table-card">
+                <h3>🏆 Top Selling Items</h3>
+                <table class="data-table" id="topItemsTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Item Name</th>
+                            <th>Qty Sold</th>
+                            <th>Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in top_items %}
+                        <tr>
+                            <td><strong>{{ item.rank }}</strong></td>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>Rs. {{ item.revenue|floatformat:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 25px; color: var(--text-secondary);">
+                                No sales data available
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Staff Performance -->
+            <div class="table-card">
+                <h3>👥 Staff Performance</h3>
+                <table class="data-table" id="staffTable">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Orders</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff in staff_performance %}
+                        <tr>
+                            <td>{{ staff.name }}</td>
+                            <td>{{ staff.role }}</td>
+                            <td>{{ staff.orders }}</td>
+                            <td>
+                                <span
+                                    class="status-badge {% if staff.status == 'Active' %}active{% else %}inactive{% endif %}">
+                                    {{ staff.status }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 25px; color: var(--text-secondary);">
+                                No staff data available
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Order Breakdown -->
+        <!-- prettier-ignore -->
+        <div class="table-card" style="max-width: 600px;">
+            <h3>📊 Order Status Breakdown</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th style="text-align: right;">Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="status-badge pending">⏳ Pending</span></td>
+                        <td style="text-align: right; font-weight: 600;" id="orderPending">{{
+                            order_breakdown.pending|default:0 }}</td>
+                    </tr>
+                    <tr>
+                        <td><span class="status-badge preparing">🍳 Preparing</span></td>
+                        <td style="text-align: right; font-weight: 600;" id="orderPreparing">{{
+                            order_breakdown.preparing|default:0 }}</td>
+                    </tr>
+                    <tr>
+                        <td><span class="status-badge ready">✅ Ready</span></td>
+                        <td style="text-align: right; font-weight: 600;" id="orderReady">{{
+                            order_breakdown.ready|default:0 }}</td>
+                    </tr>
+                    <tr>
+                        <td><span class="status-badge served">🍽️ Served</span></td>
+                        <td style="text-align: right; font-weight: 600;" id="orderServed">{{
+                            order_breakdown.served|default:0 }}</td>
+                    </tr>
+                    <tr>
+                        <td><span class="status-badge cancelled">❌ Cancelled</span></td>
+                        <td style="text-align: right; font-weight: 600;" id="orderCancelled">{{
+                            order_breakdown.cancelled|default:0 }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Edit Restaurant Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ Edit Restaurant Details</h2>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <form id="editRestaurantForm" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="name">Restaurant Name *</label>
+                        <input type="text" id="name" name="name" value="{{ restaurant_data.name }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="type">Restaurant Type *</label>
+                        <select id="type" name="type" required>
+                            {% for type_option in restaurant_types %}
+                            {% if type_option.id == restaurant_data.type.id %}
+                            <option value="{{ type_option.id }}" selected>{{ type_option.display_name }}</option>
+                            {% else %}
+                            <option value="{{ type_option.id }}">{{ type_option.display_name }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="address">Address *</label>
+                        <textarea id="address" name="address" required>{{ restaurant_data.address }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" name="phone" value="{{ restaurant_data.phone }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tables_capacity">Tables Capacity</label>
+                        <input type="number" id="tables_capacity" name="tables_capacity"
+                            value="{{ restaurant_data.tables_capacity }}" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="latitude">Latitude</label>
+                        <input type="number" id="latitude" name="latitude" step="any"
+                            value="{{ restaurant_data.latitude }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="longitude">Longitude</label>
+                        <input type="number" id="longitude" name="longitude" step="any"
+                            value="{{ restaurant_data.longitude }}">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="description">Description</label>
+                        <textarea id="description" name="description">{{ restaurant_data.description }}</textarea>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="about">About (for website)</label>
+                        <textarea id="about" name="about">{{ restaurant_data.about }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="is_active">Active Status</label>
+                        <select id="is_active" name="is_active">
+                            <option value="true" {% if restaurant_data.is_active %}selected{% endif %}>Active</option>
+                            <option value="false" {% if not restaurant_data.is_active %}selected{% endif %}>Inactive
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="hero_image">Hero Image</label>
+                        <input type="file" id="hero_image" name="hero_image" accept="image/*">
+                        {% if restaurant_data.hero_image %}
+                        <div class="current-image">
+                            <p>Current image:</p>
+                            <img src="{{ restaurant_data.hero_image.url }}" alt="Current hero image"
+                                style="max-width: 200px; max-height: 150px;">
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chart.js Initialization -->
+    <script type="application/json" id="chart-data">
+        {
+            "revenueLabels": {{ daily_revenue.labels|safe|default:"[]" }},
+            "revenueData": {{ daily_revenue.revenue|safe|default:"[]" }},
+            "orderPending": {{ order_breakdown.pending|default:0 }},
+            "orderPreparing": {{ order_breakdown.preparing|default:0 }},
+            "orderBargain": {{ order_breakdown.bargain|default:0 }},
+            "orderReady": {{ order_breakdown.ready|default:0 }},
+            "orderServed": {{ order_breakdown.served|default:0 }},
+            "orderCancelled": {{ order_breakdown.cancelled|default:0 }},
+            "hourlyLabels": {{ hourly_dist.hours|safe|default:"[]" }},
+            "hourlyData": {{ hourly_dist.orders|safe|default:"[]" }},
+            "bargainAccepted": {{ bargain_metrics.accepted|default:0 }},
+            "bargainRejected": {{ bargain_metrics.rejected|default:0 }},
+            "bargainPending": {{ bargain_metrics.pending|default:0 }}
+        }
+    </script>
+
+    <script src="{% static 'admin/js/restaurant_dashboard.js' %}"></script>
+    {% endblock %}
+</body>
+
+</html>

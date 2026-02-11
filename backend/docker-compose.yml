@@ -1,0 +1,76 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: bhansaghar-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: BhansaGhar           # From your .env
+      POSTGRES_USER: postgres           # From your .env = 'postgres'
+      POSTGRES_PASSWORD: sakkar.com # From your .env = 'Sakkaar.com'
+    ports:
+      - "5445:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 5432 -U $$POSTGRES_USER -d $$POSTGRES_DB"]  # Check with 'postgres'
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: bhansaghar-redis
+    restart: always
+    command: redis-server --appendonly yes
+    ports:
+      - "6381:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: sxnmgxr/sperium-backend:latest
+    container_name: sperium-backend
+    restart: always
+    env_file:
+      - .env
+    environment:
+      # OVERRIDE THESE for Docker networking
+      DB_HOST: postgres      # Container name, NOT localhost
+      DB_PORT: 5432
+      REDIS_URL: redis://redis:6379/0
+      REDIS_HOST: redis      # Container name
+      # Keep other values from .env
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        # Test connection with YOUR credentials
+        until PGPASSWORD='Sakkaar.com' psql -h postgres -U postgres -d BhansaGhar -c 'SELECT 1;' >/dev/null 2>&1; do
+          echo 'Database not ready yet...' &&
+          sleep 2
+        done &&
+        echo 'Database is ready!' &&
+        python manage.py migrate &&
+        gunicorn bhansaGhar_backend.wsgi:application 
+                --bind 0.0.0.0:8001 
+                --workers 4 
+                --timeout 120 
+                --access-logfile - 
+                --error-logfile - 
+                --log-level info
+      "
+    volumes:
+      - ./media:/app/media
+      - ./static:/app/staticfiles
+
+volumes:
+  postgres_data:

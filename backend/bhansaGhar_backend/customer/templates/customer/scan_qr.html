@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan QR Code - {{ restaurant.name|default:"Restaurant" }}</title>
+    <link rel="stylesheet" href="{% static 'customer/css/scan_qr.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <div class="qr-section">
+            <div class="qr-illustration"></div>
+            <h1>Welcome to <span class="restaurant-name">{{ restaurant.name|default:"Our Restaurant" }}</span></h1>
+            <div class="subtitle">Digital Dining Experience</div>
+        </div>
+
+        <div class="instructions">
+            <div class="instruction-item">
+                <div class="instruction-icon">📱</div>
+                <div class="instruction-text">Scan the QR code on your table</div>
+            </div>
+            <div class="instruction-item">
+                <div class="instruction-icon">🍽️</div>
+                <div class="instruction-text">Browse our menu and place orders</div>
+            </div>
+            <div class="instruction-item">
+                <div class="instruction-icon">⚡</div>
+                <div class="instruction-text">Enjoy instant service and updates</div>
+            </div>
+        </div>
+
+        <p>Experience seamless ordering with our secure QR code system. Your table is ready for an exceptional dining
+            experience.</p>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="goBack()">
+                ← Back to Menu
+            </button>
+            <button class="btn btn-secondary" onclick="showHelp()">
+                ❓ Need Help?
+            </button>
+        </div>
+
+        <div class="security-badge">
+            🔒 Secure & Private Experience
+        </div>
+
+        <div class="footer">
+            <p>Powered by Bhansa Ghar Nnine Solution • Contactless Dining</p>
+        </div>
+    </div>
+
+    <script>
+        function showHelp() {
+            alert('📞 For assistance, please call our staff or visit the reception desk.\n\n💡 Make sure your camera is enabled and point it at the QR code on your table.');
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+
+</html>

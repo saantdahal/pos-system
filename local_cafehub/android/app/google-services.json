@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1031806670878",
+    "project_id": "bhansa-ghar",
+    "storage_bucket": "bhansa-ghar.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1031806670878:android:92986e1e1edde85f98360f",
+        "android_client_info": {
+          "package_name": "com.nnine.bhansa_ghar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1031806670878-48mvof963vqmn4p14mu2a702j60f8au8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nnine.bhansa_ghar",
+            "certificate_hash": "23d208af16a70ff02fe7ddfc125bf505f9f338bf"
+          }
+        },
+        {
+          "client_id": "1031806670878-2v0pqtembqaoqsasck3vugd0gin6i8er.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-bUuQG9xTqiwuB-FH1OeqJQfvom8NkGA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1031806670878-2v0pqtembqaoqsasck3vugd0gin6i8er.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

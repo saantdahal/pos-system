@@ -1,0 +1,9 @@
+INFO 2026-02-01 23:50:14,721 signals ✓ Postman collection generated successfully at: /Users/sakarchaulagain/projects/nnine/sperium-lounge/backend/bhansaGhar_backend/postman_collection.json
+Watching for file changes with StatReloader
+INFO 2026-02-01 23:50:14,723 autoreload Watching for file changes with StatReloader
+WARNING 2026-02-01 23:50:14,736 services firebase_admin not installed. FCM notifications will be skipped.
+[01/Feb/2026 23:50:28] "GET /restaurant/bca-chaya-wala/ HTTP/1.1" 200 29716
+[01/Feb/2026 23:50:39] "GET /restaurant/bhol-momo-house/ HTTP/1.1" 200 25303
+[01/Feb/2026 23:50:39] "GET /restaurant/bca-chaya-wala/ HTTP/1.1" 200 29716
+[01/Feb/2026 23:50:39] "GET /restaurant/chaiwala-express/ HTTP/1.1" 200 27714
+[01/Feb/2026 23:50:39] "GET /restaurant/sperium-lounge/ HTTP/1.1" 200 26405

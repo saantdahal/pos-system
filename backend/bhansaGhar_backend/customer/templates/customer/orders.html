@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if table %}Table {{ table.number }} - {% endif %}My Orders</title>
+    <link rel="stylesheet" href="{% static 'customer/css/orders.css' %}">
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="cafe-name">{% if table %}{{ table.restaurant.name }}{% else %}Café{% endif %}</div>
+                <div class="cafe-subtitle">Your order history</div>
+            </div>
+            <div class="header-actions">
+                <div class="icon-btn" onclick="leaveTable()">
+                    🚪
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Header -->
+    <div class="orders-header">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <h2 class="orders-title">My Orders</h2>
+    </div>
+
+    <!-- Orders Container -->
+    <div class="orders-container">
+        {% if orders %}
+        {% for order in orders %}
+        <div class="order-card">
+            <div class="order-header">
+                <div class="order-id">Order #{{ order.id|slice:":8" }}</div>
+                <div class="order-status status-{{ order.status }}">{{ order.get_status_display }}</div>
+            </div>
+            <div class="order-meta">
+                <div>Table {{ order.table.number }}</div>
+                <div>{{ order.created_at|date:"M d, Y H:i" }}</div>
+            </div>
+            <div class="order-items">
+                {% for item in order.items.all %}
+                <div class="order-item">
+                    {% if item.menu_item.image %}
+                    <img src="{{ item.menu_item.image.url }}" alt="{{ item.menu_item.name }}" class="order-item-image">
+                    {% else %}
+                    <div class="order-item-image"
+                        style="background: var(--bg-secondary); display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        🍽️</div>
+                    {% endif %}
+                    <div class="order-item-details">
+                        <div class="order-item-name">{{ item.menu_item.name }}</div>
+                        <div class="order-item-quantity">{{ item.quantity }} × NPR {{ item.unit_price }}</div>
+                        {% if item.notes %}
+                        <div style="color: var(--text-secondary); font-size: 12px; margin-top: 4px;">Note: {{ item.notes
+                            }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="order-item-price">NPR {{ item.subtotal }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="order-total">
+                <div class="order-total-amount">Total: NPR {{ order.total_amount }}</div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="no-orders">
+            <div class="no-orders-icon">📋</div>
+            <div class="no-orders-title">No orders yet</div>
+            <div class="no-orders-text">Start by browsing our delicious menu and placing your first order!</div>
+            <a href="{% url 'customer:customer_menu_no_table' %}" class="order-now-btn">Browse Menu</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="showMenuPage()">
+            <div class="nav-icon">🍽️</div>
+            <div class="nav-label">Menu</div>
+        </div>
+        <div class="nav-item" onclick="openCart()">
+            <div class="nav-icon">🛒</div>
+            <div class="nav-label">Cart</div>
+        </div>
+        <div class="nav-item active">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">Orders</div>
+        </div>
+    </div>
+
+    <script src="{% static 'customer/js/orders.js' %}"></script>
+</body>
+
+</html>

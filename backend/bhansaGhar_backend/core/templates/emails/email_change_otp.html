@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Change Verification - BhansaGhar</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #FF4B2B 0%, #FF416C 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .email-change-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #FF4B2B;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .email-item {
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        .email-address {
+            font-weight: bold;
+            color: #333;
+        }
+        .otp-box {
+            background-color: #f8f9fa;
+            border: 2px dashed #FF4B2B;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin: 30px 0;
+        }
+        .otp-code {
+            font-size: 36px;
+            font-weight: bold;
+            color: #FF4B2B;
+            letter-spacing: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .info-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .security-notice {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Email Change Verification</h1>
+        </div>
+        <div class="content">
+            <p>Hello <strong>{{ username }}</strong>,</p>
+            
+            <p>You have requested to change your email address for your BhansaGhar account.</p>
+            
+            <div class="email-change-box">
+                <div class="email-item">
+                    <span style="color: #6c757d;">Current Email:</span><br>
+                    <span class="email-address">{{ old_email }}</span>
+                </div>
+                <div style="text-align: center; margin: 10px 0; color: #FF4B2B; font-size: 20px;">↓</div>
+                <div class="email-item">
+                    <span style="color: #6c757d;">New Email:</span><br>
+                    <span class="email-address">{{ new_email }}</span>
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <strong>⚠️ Important:</strong> If you did not request this change, please ignore this email and your email address will remain unchanged. We recommend changing your password immediately if you did not initiate this request.
+            </div>
+            
+            <p>To complete the email change, please use the verification code below:</p>
+            
+            <div class="otp-box">
+                <p style="margin: 0; color: #6c757d; font-size: 14px;">Your Verification Code</p>
+                <div class="otp-code">{{ otp_code }}</div>
+                <p style="margin: 0; color: #6c757d; font-size: 14px;">Valid for 10 minutes</p>
+            </div>
+            
+            <p>Enter this code in the app to verify and activate your new email address.</p>
+            
+            <div class="security-notice">
+                <strong>🔒 Security Notice:</strong> Never share this code with anyone. Our team will never ask for your verification code. This code will expire in 10 minutes.
+            </div>
+            
+            <p style="color: #6c757d; font-size: 14px; margin-top: 30px;">
+                After verification, you will need to use <strong>{{ new_email }}</strong> to log in to your account.
+            </p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2026 BhansaGhar Restaurant Management System</p>
+            <p>This is an automated email. Please do not reply.</p>
+            <p style="font-size: 12px; margin-top: 15px;">
+                Need help? Contact us at <a href="mailto:support@bhansaghar.com" style="color: #FF4B2B; text-decoration: none;">support@bhansaghar.com</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

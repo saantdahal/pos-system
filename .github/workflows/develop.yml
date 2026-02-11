@@ -1,0 +1,93 @@
+name: Deployment Pipeline for staging branch [stagings]
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN_DEV }}
+
+      - name: Build and Push Backend Image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/sperium-backend:latest -f backend/bhansaGhar_backend/Dockerfile .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/sperium-backend:latest
+
+
+  deploy-azure:
+    name: Deploy to Azure VM
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_DEV }}
+
+      - name: Deploy using Docker Compose
+        run: |
+          ssh -o StrictHostKeyChecking=no azureuser@${{ secrets.AZURE_VM_IP_DEV }} << 'EOF'
+          set -e
+
+          echo "📁 Moving to project root"
+          cd /home/azureuser/sperium-lounge
+
+          echo "📝 Creating ROOT .env"
+          cat > .env <<EOL
+          SECRET_KEY=${{ secrets.SECRET_KEY_DEV }}
+          DEBUG=True # ← FIXED: Set DEBUG to True for development
+          DB_NAME=${{ secrets.DB_NAME_DEV }}
+          DB_USER=${{ secrets.DB_USERNAME_DEV }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD_DEV }}
+          DB_HOST=bhansaghar-postgres  # ← FIXED: Use container name
+          DB_PORT=${{ secrets.DB_PORT_DEV }}
+          REDIS_HOST=bhansaghar-redis  # ← FIXED: Use container name
+          REDIS_PORT=6379
+          ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS_DEV }}
+          CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ORIGIN_DEV }}
+          CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS_DEV }}
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID_DEV }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET_DEV }}
+          EMAIL_HOST=${{ secrets.SMTP_HOST_DEV }}
+          EMAIL_PORT=${{ secrets.SMTP_PORT_DEV }}
+          EMAIL_USE_TLS=True
+          EMAIL_HOST_USER=${{ secrets.SMTP_EMAIL_DEV }}
+          EMAIL_HOST_PASSWORD=${{ secrets.SMTP_PASSWORD_DEV }}
+          DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL_DEV }}
+          CLOUDINARY_CLOUD_NAME=${{ secrets.CLOUDINARY_CLOUD_NAME_DEV }}
+          CLOUDINARY_API_KEY=${{ secrets.CLOUDINARY_API_KEY_DEV }}
+          CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET_DEV }}
+          SMS_API_KEY=${{ secrets.SMS_API_KEY_DEV }}
+          EOL
+
+          echo "📄 Copying .env to backend/"
+          cp .env backend/.env
+
+          echo "🔐 Docker login"
+          echo "${{ secrets.DOCKERHUB_TOKEN_DEV }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+          echo "📥 Pulling latest backend image"
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/sperium-backend:latest
+
+          echo "🛑 Stopping existing containers"
+          docker compose down || true
+
+          echo "🚀 Starting services"
+          docker compose up -d
+
+          echo "✅ Deployment successful"
+          docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}"
+          EOF

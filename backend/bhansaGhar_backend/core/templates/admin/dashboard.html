@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+
+<head>
+    <title>{% block title %}Bhansa Ghar Admin Dashboard{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Admin default CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/nav_sidebar.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/admin_dashboard.css' %}">
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+    <style>
+        .restaurant-selector {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .restaurant-selector label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .select-wrapper {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .select-wrapper select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .select-wrapper select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .search-filter-bar {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .filter-options {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .filter-options select {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .filter-options select:focus {
+            border-color: var(--primary-color);
+        }
+
+        .actions-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .refresh-btn {
+            padding: 10px 16px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .refresh-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .last-updated {
+            font-size: 12px;
+            color: #9ca3af;
+            white-space: nowrap;
+        }
+
+        .website-management-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .website-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .website-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+        }
+
+        .website-card-header {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            padding: 20px;
+            border-bottom: 1px solid #d1d5db;
+        }
+
+        .website-card-header h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .website-card-header p {
+            margin: 0;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .website-card-content {
+            padding: 20px;
+        }
+
+        .website-stat {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #374151;
+        }
+
+        .website-stat:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-icon {
+            font-size: 18px;
+        }
+
+        .website-card-actions {
+            padding: 15px 20px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .website-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .website-btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .website-btn.primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .website-btn.secondary {
+            background: #e5e7eb;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
+        }
+
+        .website-btn.secondary:hover {
+            background: #d1d5db;
+            border-color: #9ca3af;
+        }
+
+        @media (max-width: 768px) {
+            .restaurant-selector {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .select-wrapper select {
+                width: 100%;
+            }
+
+            .search-filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box input,
+            .filter-options select {
+                width: 100%;
+            }
+
+            .actions-wrapper {
+                margin-left: 0;
+                flex-direction: column;
+            }
+
+            .last-updated {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        .restaurants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .restaurant-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .restaurant-card:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+            transform: translateY(-4px);
+        }
+
+        .restaurant-card-header {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .restaurant-card-header h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .restaurant-card-header p {
+            margin: 0;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .restaurant-card-content {
+            padding: 16px;
+        }
+
+        .restaurant-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .stat-item .stat-label {
+            font-size: 11px;
+            color: #9ca3af;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-item .stat-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .restaurant-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .view-restaurant-btn,
+        .edit-website-btn {
+            flex: 1;
+            padding: 10px 12px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .view-restaurant-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .edit-website-btn {
+            background: #e5e7eb;
+            color: #1f2937;
+            border: 1px solid #d1d5db;
+        }
+
+        .edit-website-btn:hover {
+            background: #d1d5db;
+            border-color: #9ca3af;
+        }
+    </style>
+</head>
+
+<body>
+    {% block content %}
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div>
+                <h1>📊 Bhansa Ghar Admin Dashboard</h1>
+                <p>Real-time analytics, restaurant management & performance metrics</p>
+            </div>
+            <div class="header-actions">
+                {% if is_super_admin %}
+                <span class="admin-badge">👑 Super Admin</span>
+                {% else %}
+                <span class="admin-badge" style="background: var(--accent-color);">🏪 Restaurant Admin</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Restaurant Selector (Super Admin Only) -->
+        {% if is_super_admin %}
+        <div class="restaurant-selector">
+            <label for="restaurant-select">🏪 View Restaurant:</label>
+            <div class="select-wrapper">
+                <select id="restaurant-select" onchange="handleRestaurantChange(this.value)">
+                    <option value="" selected>📊 All Restaurants Overview</option>
+                    {% for restaurant in restaurant_stats %}
+                    <option value="{{ restaurant.id }}">🏪 {{ restaurant.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Overall Statistics Cards -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card users">
+                <div class="stat-label">Total Restaurants</div>
+                <div class="stat-value" id="statRestaurants">{{ overall_stats.total_restaurants|default:0 }}</div>
+            </div>
+            <div class="stat-card orders">
+                <div class="stat-label">Total Orders (30d)</div>
+                <div class="stat-value" id="statOrders">{{ overall_stats.total_orders|default:0 }}</div>
+            </div>
+            <div class="stat-card revenue">
+                <div class="stat-label">Total Revenue (30d)</div>
+                <div class="stat-value" id="statRevenue">Rs. {{ overall_stats.total_revenue|default:0|floatformat:0 }}
+                </div>
+            </div>
+            <div class="stat-card invoices">
+                <div class="stat-label">Active Users</div>
+                <div class="stat-value" id="statUsers">{{ overall_stats.total_users|default:0 }}</div>
+            </div>
+            <div class="stat-card active">
+                <div class="stat-label">Orders Today</div>
+                <div class="stat-value" id="statOrdersToday">{{ overall_restaurant_stats.orders_today|default:0 }}</div>
+            </div>
+            <div class="stat-card orders">
+                <div class="stat-label">Active Orders</div>
+                <div class="stat-value" id="statActiveOrders">{{ overall_restaurant_stats.active_orders|default:0 }}
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Staff</div>
+                <div class="stat-value" id="statStaff">{{ overall_restaurant_stats.total_staff|default:0 }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Tables</div>
+                <div class="stat-value" id="statTables">{{ overall_restaurant_stats.total_tables|default:0 }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Menu Items</div>
+                <div class="stat-value" id="statMenuItems">{{ overall_restaurant_stats.total_menu_items|default:0 }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <h2 class="section-title">📈 Analytics Overview</h2>
+        <div class="charts-section">
+            <!-- Daily Revenue Chart -->
+            <div class="chart-card">
+                <h3>Daily Revenue (Last 30 Days)</h3>
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Order Status Breakdown -->
+            <div class="chart-card">
+                <h3>Order Status Distribution</h3>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Hourly Distribution -->
+            <div class="chart-card">
+                <h3>Hourly Order Distribution (Today)</h3>
+                <div class="chart-container">
+                    <canvas id="hourlyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Bargain Metrics -->
+            <div class="chart-card">
+                <h3>Bargain Success Metrics</h3>
+                <div class="chart-container">
+                    <canvas id="bargainChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Restaurants Section (Super Admin Only) -->
+        {% if is_super_admin %}
+        <h2 class="section-title">🏪 Restaurant Management</h2>
+
+        <!-- Search & Filter Bar -->
+        <div class="search-filter-bar">
+            <div class="search-box">
+                <input type="text" id="restaurantSearch" placeholder="🔍 Search restaurants..."
+                    onkeyup="filterRestaurants()">
+            </div>
+            <div class="filter-options">
+                <select id="statusFilter" onchange="filterRestaurants()">
+                    <option value="">All Status</option>
+                    <option value="active">🟢 Active</option>
+                    <option value="inactive">🔴 Inactive</option>
+                </select>
+            </div>
+            <div class="actions-wrapper">
+                <button class="refresh-btn" onclick="refreshDashboard()">🔄 Refresh</button>
+                <span class="last-updated" id="lastUpdated">Last updated: Just now</span>
+            </div>
+        </div>
+
+        <div class="restaurants-grid" id="restaurantsGrid">
+            {% for restaurant in restaurant_stats %}
+            <div class="restaurant-card" data-restaurant-id="{{ restaurant.id }}">
+                <div class="restaurant-card-header">
+                    <h3>🏪 {{ restaurant.name }}</h3>
+                    {% if restaurant.is_active %}
+                    <span class="badge active">Active</span>
+                    {% else %}
+                    <span class="badge inactive">Inactive</span>
+                    {% endif %}
+                </div>
+                <div class="detail">👤 Owner: <strong>{{ restaurant.owner }}</strong></div>
+                <div class="stats-row">
+                    <div class="mini-stat">
+                        <strong>{{ restaurant.total_orders }}</strong>
+                        Total Orders
+                    </div>
+                    <div class="mini-stat">
+                        <strong>Rs. {{ restaurant.total_revenue|floatformat:0 }}</strong>
+                        Revenue
+                    </div>
+                    <div class="mini-stat">
+                        <strong>{{ restaurant.active_orders }}</strong>
+                        Active
+                    </div>
+                </div>
+                <div class="detail" style="margin-top: 12px;">
+                    <span>👥 Staff: <strong>{{ restaurant.total_staff }}</strong></span> |
+                    <span>🪑 Tables: <strong>{{ restaurant.tables_capacity }}</strong></span>
+                </div>
+                <div class="restaurant-actions">
+                    <a href="/admin/restaurant/{{ restaurant.id }}/" class="view-restaurant-btn">
+                        📊 View Dashboard
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div
+                style="grid-column: 1 / -1; text-align: center; padding: 40px; background: white; border-radius: 12px;">
+                <p style="color: #6b7280; font-size: 16px;">No restaurants found.
+                    <a href="/admin/restaurants/restaurant/add/" style="color: var(--secondary-color);">Add your
+                        first
+                        restaurant</a>
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Top Items Section -->
+        <h2 class="section-title">🏆 Top Selling Items</h2>
+        <div class="table-card">
+            <table class="admin-table" id="topItemsTable">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Item Name</th>
+                        <th>Quantity Sold</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in top_items %}
+                    <tr>
+                        <td><strong>#{{ item.rank }}</strong></td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>Rs. {{ item.revenue|floatformat:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 30px;">
+                            No sales data available yet
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Website Management Section -->
+        <h2 class="section-title">🌐 Website Management</h2>
+        <div class="website-management-grid">
+            <!-- Landing Page Management -->
+            <div class="website-card landing-page-card">
+                <div class="website-card-header">
+                    <h3>🏠 Main Website (Landing Page)</h3>
+                    <p>Manage the main company website that lists all restaurants</p>
+                </div>
+                <div class="website-card-content">
+                    <div class="website-stat">
+                        <span class="stat-icon">📄</span>
+                        <span>Hero, Features, About, Contact</span>
+                    </div>
+                    <div class="website-stat">
+                        <span class="stat-icon">📱</span>
+                        <span>App Downloads & Social Links</span>
+                    </div>
+                    <div class="website-stat">
+                        <span class="stat-icon">🏪</span>
+                        <span>Restaurant Listings</span>
+                    </div>
+                </div>
+                <div class="website-card-actions">
+                    <a href="{% url 'admin:customer_landingpage_changelist' %}" class="website-btn primary">
+                        ✏️ Edit Landing Page
+                    </a>
+                    <a href="/" target="_blank" class="website-btn secondary">
+                        👁️ View Live Site
+                    </a>
+                </div>
+            </div>
+
+            <!-- Website Management footer -->
+        </div>
+
+        <!-- Quick Links Section -->
+        <h2 class="section-title">🔗 Quick Management Links</h2>
+        <div class="quick-links">
+            <a href="{% url 'admin:restaurants_restaurant_changelist' %}" class="quick-link restaurants">🏪 Manage
+                Restaurants</a>
+            <a href="{% url 'admin:orders_order_changelist' %}" class="quick-link orders">📋 Manage Orders</a>
+            <a href="/admin/core/user/" class="quick-link staff">👥 Manage Staff</a>
+            <a href="{% url 'admin:invoices_invoice_changelist' %}" class="quick-link invoices">💰 Invoices</a>
+            <a href="{% url 'admin:analytics_dailyanalytics_changelist' %}" class="quick-link analytics">📊
+                Analytics</a>
+            <a href="{% url 'admin:restaurants_menuitem_changelist' %}" class="quick-link"
+                style="color: var(--danger-color); border-left-color: var(--danger-color);">🍽️ Menu Items</a>
+        </div>
+    </div>
+
+    <!-- Chart.js Scripts -->
+    <script type="application/json" id="chart-data">
+        {{ chart_data_json }}
+    </script>
+
+    <script src="{% static 'admin/js/admin_dashboard.js' %}"></script>
+    {% endblock %}
+</body>
+
+</html>

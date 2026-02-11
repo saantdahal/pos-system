@@ -1,0 +1,46 @@
+
+#version: "3.9"
+
+services:
+  backend:
+    image: sxnmgxr/sperium-backend:latest
+    container_name: sperium-backend
+    restart: always
+    env_file:
+      - .env   
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - "8001:8001"
+    command: gunicorn bhansaGhar_backend.wsgi:application --bind 0.0.0.0:8001
+
+  postgres:
+    image: postgres:15
+    container_name: bhansaghar-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: BhansaGhar
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sakkar.com
+    ports:
+      - "5445:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: bhansaghar-redis
+    restart: always
+    ports:
+      - "6381:6379"
+
+volumes:
+  postgres_data:

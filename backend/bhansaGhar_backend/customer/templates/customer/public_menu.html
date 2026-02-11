@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ restaurant.name }} - Dine & Order</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="{% static 'customer/css/public_menu.css' %}">
+</head>
+
+<body>
+
+    <!-- ===================== NAVBAR ===================== -->
+    <nav class="navbar" id="navbar">
+        <div class="navbar-left">
+            <button class="nav-btn" onclick="goBack()">←</button>
+            <span class="nav-title">{{ restaurant.name }}</span>
+        </div>
+        <div class="navbar-right">
+            <button class="nav-btn" onclick="shareRestaurant()">📤</button>
+        </div>
+    </nav>
+
+    <!-- ===================== HERO ===================== -->
+    <section class="hero">
+        <div class="hero-bg"
+            style="{% if restaurant.hero_image %}background-image: url('{{ restaurant.hero_image.url }}');{% endif %}">
+        </div>
+        <div class="hero-content">
+            <div class="hero-badge"><span class="dot"></span> Open Now</div>
+            <h1 class="hero-title">{{ restaurant.name|cut:" " | first }}<br><em>{{ restaurant.name }}</em></h1>
+            <p class="hero-desc">{{ restaurant.description }}</p>
+            <div class="hero-pills">
+                <div class="hero-pill">📍 {{ restaurant.address }}</div>
+                <div class="hero-pill">📞 {{ restaurant.phone }}</div>
+            </div>
+        </div>
+        <div class="scroll-hint">
+            Scroll <div class="arrow"></div>
+        </div>
+    </section>
+
+    <!-- ===================== QR STRIP ===================== -->
+    <div class="qr-strip">
+        <span class="icon">📱</span>
+        Scan the QR code on your table to <span>place orders instantly</span>
+    </div>
+
+    <!-- ===================== ABOUT ===================== -->
+    <section class="about-strip">
+        <div class="section-inner">
+            <div class="reveal">
+                <div class="about-text">
+                    {{ restaurant.about|default:"Welcome to an unforgettable dining experience crafted with care and
+                    passion." }}
+                    <em>— Est. 2024</em>
+                </div>
+            </div>
+            <div class="about-stats reveal reveal-delay-1">
+                <div class="stat-item">
+                    <div class="stat-num">{{ restaurant.tables.count|default:"12" }}</div>
+                    <div class="stat-label">Tables</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">{{ menu_items|length }}</div>
+                    <div class="stat-label">Menu Items</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">5★</div>
+                    <div class="stat-label">Rating</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">24/7</div>
+                    <div class="stat-label">Support</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== GALLERY ===================== -->
+    {% if gallery|length > 0 %}
+    <section class="section">
+        <div class="section-inner">
+            <div class="reveal">
+                <div class="section-label">Gallery</div>
+                <h2 class="section-heading">Our <em>Signature</em> Dishes</h2>
+            </div>
+            <div class="gallery-mosaic reveal" style="margin-top:28px;">
+                {% for item in gallery %}
+                <div class="g-item">
+                    {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                    <div class="g-overlay"><span>{{ item.title }}</span></div>
+                    {% else %}
+                    <div class="g-placeholder">🍽️</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ===================== HOURS + TESTIMONIALS ===================== -->
+    <section class="section" style="padding-top:40px;">
+        <div class="section-inner">
+            <div class="two-col-section">
+                <!-- Hours -->
+                <div class="card reveal">
+                    <div class="card-label">Schedule</div>
+                    <div class="card-title">Opening Hours</div>
+                    {% if restaurant.operating_hours %}
+                    {% for day, hours in restaurant.operating_hours.items %}
+                    <div class="hours-row {% if day|lower == 'tuesday' %}today{% endif %}">
+                        <span class="day">{{ day|title }}{% if day|lower == 'tuesday' %}<span
+                                class="today-badge">Today</span>{% endif %}</span>
+                        <span class="time">{{ hours|default:"Closed" }}</span>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="hours-row today"><span class="day">Tuesday<span
+                                class="today-badge">Today</span></span><span class="time">8:00 AM – 10:00 PM</span>
+                    </div>
+                    <div class="hours-row"><span class="day">Wednesday</span><span class="time">8:00 AM – 10:00
+                            PM</span></div>
+                    <div class="hours-row"><span class="day">Thursday</span><span class="time">8:00 AM – 10:00 PM</span>
+                    </div>
+                    <div class="hours-row"><span class="day">Friday</span><span class="time">8:00 AM – 11:00 PM</span>
+                    </div>
+                    <div class="hours-row"><span class="day">Saturday</span><span class="time">9:00 AM – 11:00 PM</span>
+                    </div>
+                    <div class="hours-row"><span class="day">Sunday</span><span class="time">9:00 AM – 10:00 PM</span>
+                    </div>
+                    <div class="hours-row"><span class="day">Monday</span><span class="time">Closed</span></div>
+                    {% endif %}
+                </div>
+                <!-- Testimonials -->
+                <div class="reveal reveal-delay-1">
+                    <div class="card-label" style="margin-bottom:6px;">Reviews</div>
+                    <div class="card-title" style="margin-bottom:16px;">What Guests Say</div>
+                    <div class="testimonials-stack">
+                        {% for testimonial in testimonials %}
+                        <div class="testimonial-item">
+                            <div class="t-stars">{{ testimonial.get_stars_display }}</div>
+                            <div class="t-text">"{{ testimonial.text }}"</div>
+                            <div class="t-author">— {{ testimonial.author_name }}</div>
+                        </div>
+                        {% empty %}
+                        <div class="testimonial-item">
+                            <div class="t-stars">★★★★★</div>
+                            <div class="t-text">"Amazing tea selection and the atmosphere is perfect for relaxation. The
+                                staff is very friendly!"</div>
+                            <div class="t-author">— Sarah Johnson</div>
+                        </div>
+                        <div class="testimonial-item">
+                            <div class="t-stars">★★★★★</div>
+                            <div class="t-text">"Best chai in Kathmandu! Authentic masala tea and delicious snacks."
+                            </div>
+                            <div class="t-author">— Rajesh Sharma</div>
+                        </div>
+                        <div class="testimonial-item">
+                            <div class="t-stars">★★★★☆</div>
+                            <div class="t-text">"Great place for a quick tea break. Clean, comfortable, excellent
+                                service."</div>
+                            <div class="t-author">— Priya Patel</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== LOCATION ===================== -->
+    <section class="section" style="padding-top:16px;">
+        <div class="section-inner">
+            <div class="reveal">
+                <div class="section-label">Visit</div>
+                <h2 class="section-heading" style="margin-bottom:24px;">Find <em>Us</em></h2>
+            </div>
+            <div class="location-grid reveal">
+                <div class="location-info-card">
+                    <div>
+                        <div class="loc-label">Location</div>
+                        <div class="loc-name">{{ restaurant.name }}</div>
+                        <div class="loc-detail"><span class="ico">📍</span> {{ restaurant.address }}</div>
+                        <div class="loc-detail"><span class="ico">📞</span> {{ restaurant.phone }}</div>
+                        <div class="loc-detail"><span class="ico">🕐</span> Open until 10:00 PM</div>
+                    </div>
+                    <div class="loc-actions">
+                        <a href="tel:{{ restaurant.phone }}" class="loc-btn loc-btn--primary">📞 Call Now</a>
+                        <a href="https://maps.google.com/maps/search/{{ restaurant.address }}" target="_blank"
+                            class="loc-btn loc-btn--outline">🗺️ Directions</a>
+                    </div>
+                </div>
+                <div class="location-map-wrap">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== MENU ===================== -->
+    <section class="menu-section">
+        <!-- Category Bar -->
+        {% if categories|length > 0 %}
+        <div class="category-bar">
+            <div class="category-scroll" id="categoryScroll">
+                <button class="cat-pill active" data-category="all">All</button>
+                {% for category in categories %}
+                <button class="cat-pill" data-category="{{ category.id }}">{{ category.name }}</button>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Menu Content -->
+        <div class="section" style="padding-top:36px;">
+            <div class="section-inner">
+                <div class="reveal">
+                    <div class="section-label">Explore</div>
+                    <h2 class="section-heading" style="margin-bottom:24px;">Our <em>Menu</em></h2>
+                </div>
+                {% if menu_items|length > 0 %}
+                <div class="menu-grid reveal visible" id="menuGrid">
+                    {% for item in menu_items %}
+                    <div class="menu-item" data-category="{{ item.category.id }}">
+                        <div class="menu-item-img">
+                            {% if item.image_url %}
+                            <img src="{{ item.image_url }}" alt="{{ item.name }}">
+                            {% else %}
+                            🍽️
+                            {% endif %}
+                        </div>
+                        <div class="menu-item-body">
+                            <div class="menu-item-name">{{ item.name }}</div>
+                            <div class="menu-item-desc">{{ item.description }}</div>
+                            <div class="menu-item-footer">
+                                <div class="menu-price"><span class="currency">NPR</span> {{ item.base_price }}</div>
+                                <button class="qr-btn" onclick="showToast()"><span class="lock">🔒</span> Scan
+                                    QR</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="menu-empty reveal">
+                    <div class="icon">🍽️</div>
+                    <p>No menu items available yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== FOOTER ===================== -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-top">
+                <div>
+                    <div class="footer-brand-name">{{ restaurant.name }}</div>
+                    <p class="footer-brand-desc">{{ restaurant.description }}</p>
+                </div>
+                <div>
+                    <div class="footer-col-title">Contact</div>
+                    <a href="tel:{{ restaurant.phone }}" class="footer-link">📞 {{ restaurant.phone }}</a>
+                    <a href="https://maps.google.com/maps/search/{{ restaurant.address }}" target="_blank"
+                        class="footer-link">📍 {{ restaurant.address }}</a>
+                </div>
+                <div>
+                    <div class="footer-col-title">Follow Us</div>
+                    {% for link in social_links %}
+                    <a href="{{ link.url }}" target="_blank" class="footer-link">{{ link.platform.icon|safe }} {{
+                        link.platform.name }}</a>
+                    {% empty %}
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© 2026 {{ restaurant.name }}. All rights reserved.</span>
+                <span>Powered by Bhansa Ghar</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===================== TOAST ===================== -->
+    <div class="toast" id="toast">📱 Please scan the QR code on your table to order!</div>
+
+    <!-- ===================== SCRIPTS ===================== -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="{% static 'customer/js/public_menu.js' %}"></script>
+</body>
+
+</html>
