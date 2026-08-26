@@ -286,7 +286,7 @@ All rights reserved.
 
 Maintainer & Contact
 
-nninesolutionteam@gmail.com
+dev@santoshdahal.info.np
 
 For licensing inquiries, commercial usage, partnerships, or support, please contact the maintainer directly.
 
